@@ -436,7 +436,7 @@
     animateNetwork();
 
     // =========================================
-    // 測速核心邏輯 
+    // 測速核心邏輯 (已升級：多線程強制榨乾頻寬)
     // =========================================
     const PING_URL = 'https://cloudflare.com/cdn-cgi/trace';
     const DL_URL = 'https://speed.cloudflare.com/__down?bytes=25000000'; 
@@ -476,12 +476,12 @@
             const ping = await testPing();
             document.getElementById('ping-val').innerText = ping.toString().padStart(3, '0');
 
-            setStatus('正在測試下載頻寬...');
-            const dl = await testDownload();
+            setStatus('正在測試下載頻寬 (多通道併發)...');
+            const dl = await testDownloadMultiThread();
             document.getElementById('dl-val').innerText = dl.toFixed(2).padStart(5, '0');
 
-            setStatus('正在測試上傳頻寬...');
-            const ul = await testUpload();
+            setStatus('正在測試上傳頻寬 (多通道併發)...');
+            const ul = await testUploadMultiThread();
             document.getElementById('ul-val').innerText = ul.toFixed(2).padStart(5, '0');
 
             setStatus('正在分析 CAPWAP 架設可行性...');
@@ -506,30 +506,64 @@
         return Math.round(pings.reduce((a, b) => a + b) / pings.length);
     }
 
-    async function testDownload() {
+    // 整合多線程下載測試 (強制榨乾實體頻寬極限)
+    async function testDownloadMultiThread() {
+        const threads = 4; // 開啟 4 條通道
         const start = performance.now();
         const cacheBuster = '&t=' + new Date().getTime();
-        const response = await fetch(DL_URL + cacheBuster, { cache: 'no-store' });
-        const reader = response.body.getReader();
-        let receivedLength = 0;
-        while(true) {
-            const {done, value} = await reader.read();
-            if (done) break;
-            receivedLength += value.length;
+        const downloadPromises = [];
+
+        for (let i = 0; i < threads; i++) {
+            downloadPromises.push(
+                fetch(DL_URL + cacheBuster + '&thread=' + i, { cache: 'no-store' })
+                .then(async (response) => {
+                    const reader = response.body.getReader();
+                    let receivedLength = 0;
+                    while(true) {
+                        const {done, value} = await reader.read();
+                        if (done) break;
+                        receivedLength += value.length;
+                    }
+                    return receivedLength;
+                })
+            );
         }
+
+        const results = await Promise.all(downloadPromises);
+        const totalBytes = results.reduce((a, b) => a + b, 0);
         const end = performance.now();
-        const speedMbps = ((receivedLength * 8) / ((end - start) / 1000)) / (1024 * 1024);
+        const durationInSeconds = (end - start) / 1000;
+        
+        const speedMbps = ((totalBytes * 8) / (1024 * 1024) / durationInSeconds);
         return parseFloat(speedMbps.toFixed(2));
     }
 
-    async function testUpload() {
-        const payloadSize = 10 * 1024 * 1024; 
+    // 整合多線程上傳測試
+    async function testUploadMultiThread() {
+        const threads = 4; // 開啟 4 條通道
+        const payloadSize = 5 * 1024 * 1024; // 每通道 5MB
         const payload = new Uint8Array(payloadSize);
         for (let i = 0; i < payloadSize; i++) { payload[i] = Math.floor(Math.random() * 256); }
+        
+        const uploadPromises = [];
         const start = performance.now();
-        await fetch(UL_URL, { method: 'POST', body: payload, headers: { 'Content-Type': 'application/octet-stream' }});
+        
+        for (let i = 0; i < threads; i++) {
+            uploadPromises.push(
+                fetch(UL_URL, {
+                    method: 'POST',
+                    body: payload,
+                    headers: { 'Content-Type': 'application/octet-stream' }
+                })
+            );
+        }
+
+        await Promise.all(uploadPromises);
+        const totalBytes = payloadSize * threads;
         const end = performance.now();
-        const speedMbps = ((payloadSize * 8) / ((end - start) / 1000)) / (1024 * 1024);
+        const durationInSeconds = (end - start) / 1000;
+
+        const speedMbps = ((totalBytes * 8) / (1024 * 1024) / durationInSeconds);
         return parseFloat(speedMbps.toFixed(2));
     }
 
@@ -580,7 +614,6 @@
         }
     }
 
-    // 這裡修復了上一個版本的語法錯誤
     function calculateAP() {
         const count = parseInt(document.getElementById('device-count').value);
         const resultDiv = document.getElementById('ap-result');

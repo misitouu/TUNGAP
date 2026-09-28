@@ -3,311 +3,495 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>童醫院外出網路測速</title>
+    <title>童醫院外出網路測試系統 | 專業神經網路版</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #050505;
-            --success: #00ff9d;
-            --warning: #ffb700;
-            --danger: #ff0055;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --card-bg: rgba(10, 10, 15, 0.85);
+            /* 白色科技風配色 */
+            --bg-base: #f4f7f9;
+            --panel-bg: rgba(255, 255, 255, 0.9);
+            --sys-green: #10b981; /* 專業翡翠綠 */
+            --sys-red: #ef4444;
+            --sys-yellow: #f59e0b;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-light: #e2e8f0;
         }
-        
-        /* RGB 動態流動背景 */
+
         body {
             margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(-45deg, #000000, #0a192f, #1a0b2e, #001a1a);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
+            background-color: var(--bg-base);
             color: var(--text-main);
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            padding: 40px 20px;
             min-height: 100vh;
-            padding: 20px;
             box-sizing: border-box;
+            position: relative;
             overflow-x: hidden;
         }
 
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* 網格疊加層 */
-        .grid-overlay {
+        /* 動態神經網路畫布背景 */
+        #network-bg {
             position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background-image: 
-                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 30px 30px;
-            pointer-events: none;
-            z-index: -1;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -2;
+            pointer-events: none; /* 確保不會阻擋點擊 */
         }
 
-        /* 主容器：RGB 呼吸燈特效 */
         .container {
             width: 100%;
-            max-width: 800px;
-            background: var(--card-bg);
-            padding: 2.5rem 2rem;
-            border-radius: 20px;
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            animation: rgbBreathing 4s infinite alternate;
+            max-width: 650px;
             z-index: 10;
+            position: relative; /* 確保內容在畫布上方 */
         }
 
-        @keyframes rgbBreathing {
-            0% { box-shadow: 0 0 20px rgba(0, 238, 255, 0.2), inset 0 0 10px rgba(0, 238, 255, 0.1); border-color: rgba(0, 238, 255, 0.3); }
-            33% { box-shadow: 0 0 25px rgba(255, 0, 255, 0.2), inset 0 0 15px rgba(255, 0, 255, 0.1); border-color: rgba(255, 0, 255, 0.3); }
-            66% { box-shadow: 0 0 25px rgba(0, 255, 157, 0.2), inset 0 0 15px rgba(0, 255, 157, 0.1); border-color: rgba(0, 255, 157, 0.3); }
-            100% { box-shadow: 0 0 30px rgba(0, 136, 255, 0.3), inset 0 0 20px rgba(0, 136, 255, 0.15); border-color: rgba(0, 136, 255, 0.4); }
+        /* 標題區塊 */
+        .header {
+            text-align: center;
+            margin-bottom: 2.5rem;
         }
-
-        .header-section { text-align: center; margin-bottom: 2rem; }
-        
-        /* Logo 強制裁切為圓形並加上光暈 */
-        .hospital-logo {
-            width: 90px;
-            height: 90px;
-            object-fit: cover;
-            border-radius: 50%;
+        .header img {
+            max-height: 50px;
             margin-bottom: 15px;
-            background-color: white; 
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-            animation: logoPulse 2s infinite alternate;
         }
-
-        @keyframes logoPulse {
-            from { transform: scale(1); box-shadow: 0 0 15px rgba(255, 255, 255, 0.2); }
-            to { transform: scale(1.05); box-shadow: 0 0 25px rgba(255, 255, 255, 0.4); }
-        }
-        
-        .text-logo {
-            display: none;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 1.5rem; font-weight: bold; letter-spacing: 4px;
-            color: #00eeff; text-shadow: 0 0 15px rgba(0, 238, 255, 0.6); margin-bottom: 10px;
-        }
-
         h1 {
-            margin: 0; font-size: 1.8rem; font-weight: 700; letter-spacing: 3px;
-            background: linear-gradient(90deg, #00eeff, #ff00ff, #00ff9d);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            text-shadow: 0 2px 10px rgba(255, 255, 255, 0.1);
+            margin: 0;
+            font-size: 1.6rem;
+            letter-spacing: 2px;
+            color: var(--text-main);
+            font-weight: 800;
+        }
+        .subtitle {
+            color: var(--sys-green);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.95rem;
+            letter-spacing: 2px;
+            margin-top: 10px;
+            display: inline-block;
+            padding: 6px 20px;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 20px;
+            border: 1px solid var(--sys-green);
         }
 
+        /* 統一綠色呼吸燈特效 */
+        @keyframes green-breathe {
+            0% {
+                border-color: rgba(16, 185, 129, 0.3);
+                box-shadow: 0 0 5px rgba(16, 185, 129, 0.1);
+            }
+            50% {
+                border-color: rgba(16, 185, 129, 1);
+                box-shadow: 0 0 20px rgba(16, 185, 129, 0.4), inset 0 0 10px rgba(16, 185, 129, 0.1);
+            }
+            100% {
+                border-color: rgba(16, 185, 129, 0.3);
+                box-shadow: 0 0 5px rgba(16, 185, 129, 0.1);
+            }
+        }
+
+        /* 儀表板卡片 */
         .dashboard {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem; margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            margin-bottom: 2rem;
         }
-
+        
         .metric-card {
-            background: rgba(0, 0, 0, 0.5); padding: 1.5rem; text-align: center;
-            border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); transition: all 0.3s ease;
+            background: var(--panel-bg);
+            padding: 1.5rem;
+            text-align: left;
+            position: relative;
+            border-radius: 12px;
+            border: 2px solid var(--sys-green);
+            backdrop-filter: blur(8px);
+            animation: green-breathe 4s infinite ease-in-out;
         }
-        .metric-card.upload-focus {
-            background: rgba(255, 0, 255, 0.05); border-color: rgba(255, 0, 255, 0.3);
-            box-shadow: 0 0 15px rgba(255, 0, 255, 0.1) inset;
-        }
+        
+        .metric-card:nth-child(1) { animation-delay: 0s; }
+        .row-metrics .metric-card:nth-child(1) { animation-delay: -1.3s; }
+        .row-metrics .metric-card:nth-child(2) { animation-delay: -2.6s; }
 
-        .metric-title { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; }
+        .metric-title {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
         .metric-value {
-            font-family: 'Courier New', Courier, monospace; font-size: 3rem; font-weight: bold; margin: 10px 0; color: #fff; text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin: 5px 0 0 0;
+            color: var(--text-main);
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
         }
-        .upload-focus .metric-value { color: #ff00ff; text-shadow: 0 0 20px rgba(255, 0, 255, 0.6); }
-        .metric-unit { font-size: 0.9rem; color: var(--text-muted); letter-spacing: 1px; }
+        .metric-value span:first-child { color: var(--sys-green); }
+        .metric-unit {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-weight: normal;
+        }
+        .row-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+        }
 
+        /* 啟動按鈕 */
         .btn-start {
-            display: block; width: 100%; padding: 1.2rem; font-size: 1.2rem; font-weight: bold; letter-spacing: 3px;
-            color: #fff; background: rgba(0, 238, 255, 0.1); border: 1px solid #00eeff; border-radius: 8px; cursor: pointer;
-            box-shadow: 0 0 15px rgba(0, 238, 255, 0.3); transition: all 0.3s ease; text-transform: uppercase;
+            width: 100%;
+            padding: 1.2rem;
+            font-size: 1.3rem;
+            font-weight: bold;
+            background: var(--panel-bg);
+            color: var(--sys-green);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 3px;
+            border: 2px solid var(--sys-green);
+            animation: green-breathe 3s infinite ease-in-out;
+            backdrop-filter: blur(8px);
         }
-        .btn-start:hover { background: #00eeff; color: #000; box-shadow: 0 0 30px rgba(0, 238, 255, 0.6); }
-        .btn-start:disabled { background: rgba(255, 255, 255, 0.05); color: #475569; box-shadow: none; cursor: not-allowed; border-color: #334155; }
-
+        
+        .btn-start:hover {
+            background: var(--sys-green);
+            color: #fff;
+            animation: none; 
+            box-shadow: 0 5px 20px rgba(16, 185, 129, 0.4);
+            transform: translateY(-2px);
+        }
+        .btn-start:disabled {
+            border-color: var(--border-light) !important;
+            color: var(--text-muted) !important;
+            background: #f1f5f9 !important;
+            cursor: not-allowed;
+            animation: none !important;
+            box-shadow: none !important;
+            transform: translateY(0) !important;
+        }
+        
         #status {
-            text-align: center; margin-top: 1.5rem; height: 20px;
-            color: #00eeff; font-family: 'Courier New', monospace; letter-spacing: 1.5px;
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--text-muted);
+            font-size: 1rem;
+            font-weight: bold;
+            letter-spacing: 1px;
         }
 
-        /* 測速結果區塊 */
+        /* 評估區塊 */
         .evaluation-box {
-            display: none; margin-top: 1.5rem; padding: 1.5rem;
-            background: rgba(0, 0, 0, 0.6); border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: center; animation: fadeIn 0.5s ease-out;
+            display: none;
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: var(--panel-bg);
+            border-radius: 12px;
+            border: 2px solid transparent;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            backdrop-filter: blur(8px);
         }
-        .eval-title { font-size: 1.3rem; font-weight: bold; margin-bottom: 0.8rem; letter-spacing: 1px; }
-        .eval-desc { font-size: 1rem; line-height: 1.6; margin-bottom: 1.5rem; color: #cbd5e1; }
-        .eval-simulate {
-            background: rgba(0, 0, 0, 0.8); padding: 15px; border-radius: 8px;
-            font-family: 'Courier New', monospace; font-size: 0.95rem; color: #94a3b8;
-            border: 1px solid rgba(255, 255, 255, 0.1); text-align: left;
+        .eval-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            letter-spacing: 1px;
         }
-        .eval-simulate span { color: #fff; font-weight: bold; font-size: 1.1em; }
-        
-        .eval-excellent { background: rgba(0, 255, 157, 0.05); border-color: var(--success); }
-        .eval-excellent .eval-title { color: var(--success); text-shadow: 0 0 10px rgba(0, 255, 157, 0.4); }
-        .eval-warning { background: rgba(255, 183, 0, 0.05); border-color: var(--warning); }
-        .eval-warning .eval-title { color: var(--warning); text-shadow: 0 0 10px rgba(255, 183, 0, 0.4); }
-        .eval-danger { background: rgba(255, 0, 85, 0.05); border-color: var(--danger); }
-        .eval-danger .eval-title { color: var(--danger); text-shadow: 0 0 10px rgba(255, 0, 85, 0.4); }
-        
-        /* 設備數量評估區塊 */
-        .device-calc-section {
-            display: none; margin-top: 1.5rem; padding: 1.5rem;
-            background: rgba(0, 238, 255, 0.05); border-radius: 12px;
-            border: 1px dashed rgba(0, 238, 255, 0.4);
-            animation: fadeIn 0.5s ease-out; text-align: center;
+        .eval-desc {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--text-main);
         }
-        .calc-title { color: #00eeff; font-weight: bold; font-size: 1.2rem; margin-bottom: 1rem; letter-spacing: 2px; }
-        .input-group { display: flex; gap: 10px; justify-content: center; }
-        .device-input {
-            background: rgba(0, 0, 0, 0.8); border: 1px solid #00eeff; color: #fff;
-            padding: 12px; font-size: 1.2rem; border-radius: 8px; width: 60%;
-            text-align: center; outline: none; font-family: 'Courier New', monospace;
+        .deduction-box {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(248, 250, 252, 0.8);
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+            font-size: 0.95rem;
+            line-height: 1.8;
+            color: var(--text-muted);
         }
-        .device-input:focus { box-shadow: 0 0 15px rgba(0, 238, 255, 0.4); }
-        .btn-calc {
-            background: linear-gradient(90deg, #00eeff, #0088ff); color: #000;
-            border: none; padding: 0 20px; font-weight: bold; border-radius: 8px;
-            cursor: pointer; font-size: 1rem; letter-spacing: 1px; transition: 0.3s;
-        }
-        .btn-calc:hover { box-shadow: 0 0 20px rgba(0, 238, 255, 0.6); }
+        .val-highlight { color: var(--sys-green); font-size: 1.1rem; font-weight: bold; font-family: 'Share Tech Mono', monospace;}
 
-        /* 計算結果顯示 */
-        .ap-result {
-            display: none; margin-top: 1.5rem; padding: 1.5rem; background: rgba(0, 0, 0, 0.8);
-            border-radius: 8px; border-left: 4px solid #00ff9d; text-align: left;
-            animation: fadeIn 0.5s ease-out; font-family: 'Courier New', monospace; line-height: 1.8;
-        }
-        .ap-result span.highlight { color: #00ff9d; font-size: 1.2em; font-weight: bold; }
-        .ap-result span.warn { color: #ffb700; font-weight: bold; }
-        .ap-result span.danger { color: #ff0055; font-weight: bold; }
+        .eval-excellent { border-color: var(--sys-green); background: rgba(16,185,129,0.05); }
+        .eval-excellent .eval-title { color: var(--sys-green); }
+        .eval-warning { border-color: var(--sys-yellow); background: rgba(245,158,11,0.05); }
+        .eval-warning .eval-title { color: var(--sys-yellow); }
+        .eval-danger { border-color: var(--sys-red); background: rgba(239,68,68,0.05); }
+        .eval-danger .eval-title { color: var(--sys-red); }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* AP 運算區塊 */
+        .ap-calc-box {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: var(--panel-bg);
+            border-radius: 12px;
+            border: 2px solid var(--sys-green);
+            display: none;
+            animation: green-breathe 4s infinite ease-in-out;
+            backdrop-filter: blur(8px);
+        }
+        .ap-calc-box h3 {
+            margin: 0 0 15px 0;
+            font-size: 1.1rem;
+            color: var(--sys-green);
+            letter-spacing: 1px;
+            text-align: center;
+            font-weight: 800;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+        .input-group input {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            background: #f8fafc;
+            border: 2px solid var(--border-light);
+            color: var(--text-main);
+            border-radius: 8px;
+            font-size: 1.1rem;
+            outline: none;
+            text-align: center;
+            transition: 0.3s;
+        }
+        .input-group input:focus { border-color: var(--sys-green); box-shadow: 0 0 10px rgba(16,185,129,0.2); }
+        .input-group button {
+            background: var(--sys-green);
+            border: none;
+            color: #fff;
+            border-radius: 8px;
+            padding: 0 1.5rem;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .input-group button:hover {
+            background: #059669;
+            box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+        }
+        #ap-result {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-light);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .maintainer-footer {
+            position: fixed;
+            bottom: 15px;
+            left: 15px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            pointer-events: none; 
+            z-index: 999;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
 
-<div class="grid-overlay"></div>
+<!-- 神經網路背景畫布 -->
+<canvas id="network-bg"></canvas>
 
 <div class="container">
-    
-    <div class="header-section">
-        <!-- 檔案名稱維持為 image_2.png -->
-        <img src="image_2.png" alt="童綜合醫院 Logo" class="hospital-logo" onerror="this.style.display='none'; document.getElementById('backup-logo').style.display='block';">
-        <div id="backup-logo" class="text-logo">[ TUNG MEDICAL ]</div>
-        
-        <h1>童醫院外出網路測速</h1>
+    <div class="header">
+        <img src="image_2.png" alt="童綜合醫院" onerror="this.style.display='none'">
+        <h1>童醫院外出網路測試系統</h1>
+        <div class="subtitle">CAPWAP 節點 // 頻寬評估系統</div>
     </div>
     
     <div class="dashboard">
         <div class="metric-card">
-            <div class="metric-title">Ping 延遲</div>
-            <div class="metric-value" id="ping-val">--</div>
-            <div class="metric-unit">ms</div>
+            <div class="metric-title">延遲 (Ping)</div>
+            <div class="metric-value">
+                <span id="ping-val">---</span>
+                <span class="metric-unit">ms</span>
+            </div>
         </div>
-        <div class="metric-card">
-            <div class="metric-title">Download 下載</div>
-            <div class="metric-value" id="dl-val">--</div>
-            <div class="metric-unit">Mbps</div>
-        </div>
-        <div class="metric-card upload-focus">
-            <div class="metric-title">Upload 上傳 (關鍵)</div>
-            <div class="metric-value" id="ul-val">--</div>
-            <div class="metric-unit">Mbps</div>
+        <div class="row-metrics">
+            <div class="metric-card">
+                <div class="metric-title">下載頻寬 (Download)</div>
+                <div class="metric-value">
+                    <span id="dl-val">--.--</span>
+                    <span class="metric-unit">Mbps</span>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">上傳頻寬 (Upload)</div>
+                <div class="metric-value">
+                    <span id="ul-val">--.--</span>
+                    <span class="metric-unit">Mbps</span>
+                </div>
+            </div>
         </div>
     </div>
 
-    <button class="btn-start" id="start-btn" onclick="startTest()">INITIATE SYSTEM SCAN // 開始掃描</button>
-    <div id="status">SYSTEM READY. 等待指令...</div>
+    <button class="btn-start" id="start-btn" onclick="startTest()">啟動網路測試</button>
+    <div id="status">系統已就緒，請點擊上方按鈕開始...</div>
 
-    <!-- 測速結果區塊 -->
     <div id="eval-box" class="evaluation-box">
         <div class="eval-title" id="eval-title">--</div>
         <div class="eval-desc" id="eval-desc">--</div>
-        <div class="eval-simulate">
-            > 扣除 CAPWAP 封裝與路由耗損...<br>
-            > 預估院內實際下載 : <span id="sim-dl-text">-- Mbps</span><br>
-            > 預估院內實際上傳 : <span class="ul-highlight" id="sim-ul-text">-- Mbps</span>
+        
+        <div class="deduction-box">
+            > 執行 CAPWAP / 4G-5G 耗損換算...<br>
+            > 預估院內實際下載：<span id="sim-dl-text" class="val-highlight">--</span><br>
+            > 預估院內實際上傳：<span id="sim-ul-text" class="val-highlight">--</span>
         </div>
     </div>
 
-    <!-- 設備承載量計算區塊 -->
-    <div id="device-calc-section" class="device-calc-section">
-        <div class="calc-title">AP 架設與頻寬評估</div>
+    <div id="ap-calc" class="ap-calc-box">
+        <h3>設備承載與架設建議計算</h3>
         <div class="input-group">
-            <input type="number" id="device-count" class="device-input" placeholder="請輸入預估連線設備數 (台)" min="1">
-            <button class="btn-calc" onclick="calculateAP()">執行運算</button>
+            <input type="number" id="device-count" placeholder="請輸入外勤總設備數量 (台)" min="1">
+            <button onclick="calculateAP()">計算</button>
         </div>
-        <div id="ap-result" class="ap-result"></div>
+        <div id="ap-result"></div>
     </div>
-
 </div>
 
+<div class="maintainer-footer">維護人：姚鈞凱 / 74911</div>
+
 <script>
+    // =========================================
+    // 神經網路背景動畫 (Canvas Animation)
+    // =========================================
+    const canvas = document.getElementById('network-bg');
+    const ctx = canvas.getContext('2d');
+    let width, height, particles;
+
+    function initNetwork() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+        particles = [];
+        // 依照螢幕大小決定神經節點數量
+        const particleCount = Math.floor((width * height) / 12000); 
+        
+        for (let i = 0; i < particleCount; i++) {
+            particles.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                vx: (Math.random() - 0.5) * 0.8, // 稍微調快一點點讓動態更明顯
+                vy: (Math.random() - 0.5) * 0.8,
+                radius: Math.random() * 1.5 + 0.5
+            });
+        }
+    }
+
+    function animateNetwork() {
+        ctx.clearRect(0, 0, width, height);
+        
+        for (let i = 0; i < particles.length; i++) {
+            let p = particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            
+            // 碰到邊緣反彈
+            if (p.x < 0 || p.x > width) p.vx *= -1;
+            if (p.y < 0 || p.y > height) p.vy *= -1;
+            
+            // 繪製神經節點 (淡灰色)
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(148, 163, 184, 0.6)'; 
+            ctx.fill();
+            
+            // 繪製節點連線
+            for (let j = i + 1; j < particles.length; j++) {
+                let p2 = particles[j];
+                let dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+                // 距離低於 130 時產生連線
+                if (dist < 130) {
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    // 距離越近，線條越明顯，最高透明度 0.2
+                    ctx.strokeStyle = `rgba(148, 163, 184, ${0.2 - (dist / 130) * 0.2})`; 
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
+            }
+        }
+        requestAnimationFrame(animateNetwork);
+    }
+
+    window.addEventListener('resize', initNetwork);
+    initNetwork();
+    animateNetwork();
+
+    // =========================================
+    // 測速核心邏輯 
+    // =========================================
     const PING_URL = 'https://cloudflare.com/cdn-cgi/trace';
     const DL_URL = 'https://speed.cloudflare.com/__down?bytes=25000000'; 
     const UL_URL = 'https://speed.cloudflare.com/__up'; 
 
-    // 儲存測速結果供後續 AP 計算使用
     let globalSimDl = 0;
     let globalSimUl = 0;
+    let isNetworkGood = false;
+
+    function setStatus(text, isError = false) {
+        const statusEl = document.getElementById('status');
+        statusEl.innerText = text;
+        if(isError) {
+            statusEl.style.color = "var(--sys-red)";
+        } else {
+            statusEl.style.color = "var(--text-muted)";
+        }
+    }
 
     async function startTest() {
         const btn = document.getElementById('start-btn');
-        const status = document.getElementById('status');
         const evalBox = document.getElementById('eval-box');
-        const calcSection = document.getElementById('device-calc-section');
-        const apResult = document.getElementById('ap-result');
+        const apBox = document.getElementById('ap-calc');
         
         btn.disabled = true;
-        btn.innerText = 'SCANNING... // 頻段解析中';
+        btn.innerText = '測試進行中...';
         evalBox.style.display = 'none';
-        calcSection.style.display = 'none';
-        apResult.style.display = 'none';
-        document.getElementById('device-count').value = '';
+        apBox.style.display = 'none';
+        document.getElementById('ap-result').style.display = 'none';
         
-        document.getElementById('ping-val').innerText = '--';
-        document.getElementById('dl-val').innerText = '--';
-        document.getElementById('ul-val').innerText = '--';
+        document.getElementById('ping-val').innerText = '---';
+        document.getElementById('dl-val').innerText = '--.--';
+        document.getElementById('ul-val').innerText = '--.--';
 
         try {
-            status.innerText = '> 正在測量節點延遲 (PING)...';
-            const finalPing = await testPing();
-            document.getElementById('ping-val').innerText = finalPing;
+            setStatus('正在測試網路延遲 (Ping)...');
+            const ping = await testPing();
+            document.getElementById('ping-val').innerText = ping.toString().padStart(3, '0');
 
-            status.innerText = '> 正在多線程轟炸下載極限 (DL)...';
-            const finalDl = await testDownloadMultiThread();
-            document.getElementById('dl-val').innerText = finalDl;
+            setStatus('正在測試下載頻寬...');
+            const dl = await testDownload();
+            document.getElementById('dl-val').innerText = dl.toFixed(2).padStart(5, '0');
 
-            status.innerText = '> 正在多線程轟炸上傳極限 (UL)...';
-            const finalUl = await testUploadMultiThread();
-            document.getElementById('ul-val').innerText = finalUl;
+            setStatus('正在測試上傳頻寬...');
+            const ul = await testUpload();
+            document.getElementById('ul-val').innerText = ul.toFixed(2).padStart(5, '0');
 
-            status.innerText = '> 測試完成，正在建立評估報告...';
-            analyzeNetwork(finalPing, finalDl, finalUl);
-            
-            // 測速完成後，顯示設備數量計算區塊
-            calcSection.style.display = 'block';
+            setStatus('正在分析 CAPWAP 架設可行性...');
+            analyzeNetwork(ping, dl, ul);
 
         } catch (error) {
-            status.innerText = 'ERROR: 連線異常，請確認行動網路訊號。';
-            status.style.color = 'var(--danger)';
+            setStatus('❌ 連線失敗：請檢查 4G/5G 訊號', true);
         } finally {
             btn.disabled = false;
-            btn.innerText = 'RESTART SCAN // 重新測試';
+            btn.innerText = '重新測試網路';
         }
     }
 
@@ -316,13 +500,14 @@
         for (let i = 0; i < 5; i++) {
             const start = performance.now();
             await fetch(PING_URL, { mode: 'no-cors', cache: 'no-store' });
-            pings.push(performance.now() - start);
+            const end = performance.now();
+            pings.push(end - start);
         }
         return Math.round(pings.reduce((a, b) => a + b) / pings.length);
     }
 
-    // 核心更改：6 條併發通道下載測試
-    async function testDownloadMultiThread() {
+    // 替換為多線程下載測試 (6條通道併發)
+    async function testDownload() {
         const threads = 6;
         const start = performance.now();
         let totalReceived = 0;
@@ -344,8 +529,8 @@
         return parseFloat(speedMbps.toFixed(2));
     }
 
-    // 核心更改：3 條併發通道上傳測試
-    async function testUploadMultiThread() {
+    // 替換為多線程上傳測試 (3條通道併發)
+    async function testUpload() {
         const threads = 3; 
         const payloadSize = 5 * 1024 * 1024; 
         const payload = new Uint8Array(payloadSize);
@@ -366,75 +551,88 @@
         const evalBox = document.getElementById('eval-box');
         const title = document.getElementById('eval-title');
         const desc = document.getElementById('eval-desc');
-        const status = document.getElementById('status');
+        const apBox = document.getElementById('ap-calc');
         
-        globalSimDl = parseFloat((dl * 0.7).toFixed(1));
-        globalSimUl = parseFloat((ul * 0.6).toFixed(1));
+        globalSimDl = parseFloat((dl * 0.75).toFixed(1)); 
+        globalSimUl = parseFloat((ul * 0.7).toFixed(1)); 
         document.getElementById('sim-dl-text').innerText = globalSimDl + ' Mbps';
         document.getElementById('sim-ul-text').innerText = globalSimUl + ' Mbps';
 
         evalBox.className = 'evaluation-box';
+        isNetworkGood = false;
 
-        if (ping > 100 || globalSimUl < 10) {
+        if (ping > 100) {
             evalBox.classList.add('eval-danger');
-            title.innerText = '[ 警告 ] 基礎上傳頻寬嚴重不足';
-            desc.innerText = '目前的網路狀況極不穩定，無論架設幾台 AP 都容易斷線，請優先移動路由器改善 4G/5G 訊號。';
-            status.style.color = 'var(--danger)';
-        } else if (ping > 60 || globalSimUl < 25) {
+            title.innerText = `❌ 警告：網路延遲過高 (${ping}ms)`;
+            desc.innerHTML = `高延遲將導致 CAPWAP 隧道崩潰：<br>- <strong>AP 斷線：</strong>心跳封包遺失，Cisco AP 將不斷重啟。<br>- <strong>系統異常：</strong>HIS 系統連線逾時。<br><span style="color: var(--sys-red); font-weight:bold;">> 處置建議：請將路由器移至無遮蔽處，直到 Ping < 100ms。</span>`;
+        } 
+        else if (globalSimUl < 10) {
+            evalBox.classList.add('eval-danger');
+            title.innerText = '❌ 警告：上傳頻寬嚴重不足';
+            desc.innerText = '上傳頻寬極低，無法支撐多台設備回傳醫療資料。請移動路由器尋找更佳訊號點。';
+        } 
+        else if (ping > 60 || globalSimUl < 25) {
             evalBox.classList.add('eval-warning');
-            title.innerText = '[ 注意 ] 頻寬堪用，需謹慎分配';
-            desc.innerText = '基礎頻寬達標，但建議避免同時傳輸大型醫療影像，請在下方輸入設備數量以進行精確評估。';
-            status.style.color = 'var(--warning)';
-        } else {
+            title.innerText = '⚠️ 注意：網路堪用，需謹慎分配';
+            desc.innerText = 'CAPWAP 可穩定連線，但建議避免同時傳輸大型醫療影像(PACS)。請於下方執行負載計算。';
+            isNetworkGood = true;
+        } 
+        else {
             evalBox.classList.add('eval-excellent');
-            title.innerText = '[ 允許 ] 網路品質優良';
-            desc.innerText = '訊號極佳，具備良好的承載潛力。請在下方輸入預計連線的設備數量，計算 AP 需求。';
-            status.style.color = 'var(--success)';
+            title.innerText = '✅ 狀態：網路品質優良';
+            desc.innerText = '低延遲、高頻寬。CAPWAP 協議將完美穩定運作。請於下方執行設備負載計算。';
+            isNetworkGood = true;
         }
 
         evalBox.style.display = 'block';
-        status.innerText = 'ANALYSIS COMPLETE. // 等待設備數量輸入';
+        
+        if (isNetworkGood) {
+            setStatus('✨ 分析完成：請輸入設備數量進行評估');
+            apBox.style.display = 'block';
+        } else {
+            setStatus('❌ 分析完成：當前環境不適合架設', true);
+        }
     }
 
     function calculateAP() {
-        const deviceInput = document.getElementById('device-count').value;
-        const resultBox = document.getElementById('ap-result');
-        const devices = parseInt(deviceInput);
-
-        if (isNaN(devices) || devices <= 0) {
-            alert("請輸入有效的設備數量！");
+        const count = parseInt(document.getElementById('device-count').value);
+        const resultDiv = document.getElementById('ap-result');
+        
+        if (!count || count <= 0) {
+            alert('請輸入有效的設備數量');
             return;
         }
 
-        const apNeeded = Math.ceil(devices / 30);
+        // 計算需要的組數 (每組最多 15 台)
+        const setsNeeded = Math.ceil(count / 15);
         
-        const requiredDl = devices * 1.0;
-        const requiredUl = devices * 0.5;
-
-        let resultHTML = `> 目標設備數量：${devices} 台<br>`;
-        resultHTML += `> 建議部署 AP：<span class="highlight">${apNeeded}</span> 顆 (基於連線穩定度分配)<br><br>`;
+        // 算出每台路由器要分攤幾台設備
+        const devicesPerRouter = count > 15 ? Math.ceil(count / setsNeeded) : count;
         
-        resultHTML += `[ WAN 頻寬承載力分析 ]<br>`;
+        // 所需頻寬計算
+        const reqDl = devicesPerRouter * 2;
+        const reqUl = devicesPerRouter * 0.5;
         
-        if (globalSimUl >= requiredUl) {
-            resultHTML += `> 上傳頻寬：<span class="highlight">足夠</span> (現有 ${globalSimUl} Mbps / 需 ${requiredUl} Mbps)<br>`;
-            resultBox.style.borderLeftColor = '#00ff9d';
+        resultDiv.style.display = 'block';
+        
+        if (reqDl > globalSimDl || reqUl > globalSimUl) {
+            resultDiv.innerHTML = `
+                <span style="color: var(--sys-red); font-weight:bold;">[ 運算結果 ] 此位置訊號無法承受分配負載</span><br><br>
+                > 總設備數：${count} 台<br>
+                > 建議準備架設：<span style="color: var(--text-main); font-weight:bold;">${setsNeeded} 組 (路由器 + AP)</span><br><br>
+                依據數量，每組需負擔 ${devicesPerRouter} 台連線 (需 下載 ${reqDl} / 上傳 ${reqUl} Mbps)。<br>
+                <strong>但您目前的測速結果過低</strong>，請尋找更佳訊號點，或增開組數分流。
+            `;
         } else {
-            resultHTML += `> 上傳頻寬：<span class="danger">嚴重不足！</span> (現有 ${globalSimUl} Mbps / 需 ${requiredUl} Mbps)<br>`;
-            resultHTML += `<span class="warn">  ※ 警告：4G/5G 路由器上傳已達極限，即使架設 ${apNeeded} 顆 AP，現場仍會卡頓或斷線。</span><br>`;
-            resultBox.style.borderLeftColor = '#ff0055';
+            resultDiv.innerHTML = `
+                <span style="color: var(--sys-green); font-weight:bold;">[ 運算結果 ] 頻寬許可，建議如下：</span><br><br>
+                > 外勤總設備數：${count} 台<br>
+                > 建議準備架設：<span style="color: var(--text-main); font-size: 1.2rem; font-weight: bold;">${setsNeeded} 組</span><br>
+                <span style="color: var(--text-muted); font-size: 0.85rem;">(註：1組 = 1台 4G/5G 路由器 + 1台 Cisco AP)</span><br><br>
+                當前測得的網速，足以承擔這組設備分配到的負載 (${devicesPerRouter}台) 流量。
+            `;
         }
-
-        if (globalSimDl >= requiredDl) {
-            resultHTML += `> 下載頻寬：<span class="highlight">足夠</span> (現有 ${globalSimDl} Mbps / 需 ${requiredDl} Mbps)`;
-        } else {
-            resultHTML += `> 下載頻寬：<span class="warn">可能吃緊</span> (現有 ${globalSimDl} Mbps / 需 ${requiredDl} Mbps)`;
-        }
-
-        resultBox.innerHTML = resultHTML;
-        resultBox.style.display = 'block';
     }
 </script>
-
 </body>
 </html>
